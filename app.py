@@ -3,6 +3,7 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score
+from sklearn.preprocessing import LabelEncoder
 
 # Streamlit app title
 st.title("Logistic Regression Prediction with CSV/Excel Upload")
@@ -12,31 +13,50 @@ uploaded_file = st.file_uploader("Upload a CSV or Excel file", type=["csv", "xls
 
 # Process the file
 if uploaded_file is not None:
-    # Check if the uploaded file is Excel or CSV
-    if uploaded_file.name.endswith('.xlsx'):
-        # Read Excel file
-        df = pd.read_excel(uploaded_file)
-    else:
-        # Read CSV file
-        df = pd.read_csv(uploaded_file)
-    
+    try:
+        # Check if the uploaded file is Excel or CSV
+        if uploaded_file.name.endswith('.xlsx'):
+            # Read Excel file
+            df = pd.read_excel(uploaded_file, engine='openpyxl')
+        else:
+            # Read CSV file with specific encoding
+            df = pd.read_csv(uploaded_file, encoding='utf-8')
+    except UnicodeDecodeError:
+        # If UTF-8 fails, try ISO-8859-1 encoding
+        df = pd.read_csv(uploaded_file, encoding='ISO-8859-1')
+
     # Display the dataset preview
     st.write("Dataset preview:", df.head())
 
-    # Basic data exploration
-    if st.checkbox('Show column names'):
-        st.write(df.columns)
+    # Check for missing values and invalid data types
+    st.write("Missing values in the dataset:")
+    st.write(df.isnull().sum())
     
-    if st.checkbox('Show dataset shape'):
-        st.write(df.shape)
-    
+    st.write("Data types in the dataset:")
+    st.write(df.dtypes)
+
     # Select target column
     target_column = st.selectbox("Select the target column (y)", df.columns)
 
     # Select features (X) and target (y)
     X = df.drop(columns=[target_column])
     y = df[target_column]
-    
+
+    # Ensure no missing values in features
+    if X.isnull().sum().any():
+        st.write("Missing values found in feature columns. Handling missing values...")
+        X = X.fillna(0)  # Example: fill missing values with 0
+
+    # Handle categorical features by encoding them
+    for column in X.select_dtypes(include=['object']).columns:
+        le = LabelEncoder()
+        X[column] = le.fit_transform(X[column])
+
+    # Ensure target column is numeric
+    if y.dtype == 'object':
+        le_target = LabelEncoder()
+        y = le_target.fit_transform(y)
+
     # Split the data into training and testing sets
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
