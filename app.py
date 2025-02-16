@@ -5,20 +5,21 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score
 
 # Streamlit app title
-st.title("AI Powered Data Predictor")
+st.title("Logistic Regression Prediction with CSV/Excel Upload")
 
 # File uploader widget
 uploaded_file = st.file_uploader("Upload a CSV or Excel file", type=["csv", "xlsx"])
 
 # Process the file
 if uploaded_file is not None:
+    # Check if the uploaded file is Excel or CSV
     if uploaded_file.name.endswith('.xlsx'):
-        df = pd.read_csv(uploaded_file)
-
+        # Read Excel file
+        df = pd.read_excel(uploaded_file)
     else:
         # Read CSV file
         df = pd.read_csv(uploaded_file)
-        
+    
     # Display the dataset preview
     st.write("Dataset preview:", df.head())
 
