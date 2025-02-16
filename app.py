@@ -8,13 +8,17 @@ from sklearn.metrics import accuracy_score
 st.title("AI Powered Data Predictor")
 
 # File uploader widget
-uploaded_file = st.file_uploader("Upload a CSV file", type=["csv"])
+uploaded_file = st.file_uploader("Upload a CSV or Excel file", type=["csv", "xlsx"])
 
 # Process the file
 if uploaded_file is not None:
-    # Read the CSV file
-    df = pd.read_csv(uploaded_file)
-    
+    if uploaded_file.name.endswith('.xlsx'):
+        df = pd.read_csv(uploaded_file)
+
+    else:
+        # Read CSV file
+        df = pd.read_csv(uploaded_file)
+        
     # Display the dataset preview
     st.write("Dataset preview:", df.head())
 
