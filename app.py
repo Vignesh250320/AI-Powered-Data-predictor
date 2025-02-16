@@ -26,7 +26,7 @@ if uploaded_file is not None:
         df = pd.read_csv(uploaded_file, encoding='ISO-8859-1')
 
     # Display the dataset preview
-    st.write("Dataset preview:", df.head())
+    st.write("Dataset preview:", df.head(10))
 
     # Check for missing values and invalid data types
     st.write("Missing values in the dataset:")
